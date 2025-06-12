@@ -1,7 +1,8 @@
 ---
-- name: Move all SQL files from /tmp to /home/ubcustom/deployments/kamote, then chown oracle:dba
+- name: Move all SQL files from /tmp to /home/ubcustom/deployments/kamote as root, then chown oracle:dba
   hosts: all
   become: yes
+  remote_user: root
   vars:
     destination_dir: "/home/ubcustom/deployments/kamote"
   tasks:
