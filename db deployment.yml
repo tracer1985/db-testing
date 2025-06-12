@@ -1,36 +1,30 @@
 ---
-- name: Copy *.sql files and chown deployments directory
+- name: Move all SQL files from /tmp to /home/ubcustom/deployments/kamote, then chown oracle:dba
   hosts: all
   become: yes
   vars:
-    variable: kamote # Override with --extra-vars "variable=your_value"
-    src_dir: /tmp   # Set to directory containing your .sql files
-    dest_dir: "/home/ubcustom/deployments/{{ variable }}"
-    deployments_dir: "/home/ubcustom/deployments"
-
- tasks:
-    - name: Copy all .sql files with permissions preserved
-      ansible.builtin.copy:
-        src: "{{ item }}"
-        dest: "{{ dest_dir }}/"
-        owner: root
-        group: root
-        mode: preserve
-      with_fileglob:
-        - "{{ src_dir }}/*.sql"
-
-    - name: Ensure target directory exists
-      ansible.builtin.file:
-        path: "{{ dest_dir }}"
+    destination_dir: "/home/ubcustom/deployments/kamote"
+  tasks:
+    - name: Ensure destination directory exists
+      file:
+        path: "{{ destination_dir }}"
         state: directory
         owner: oracle
         group: dba
         mode: '0755'
- 
-    - name: Recursively chown deployments directory
-      ansible.builtin.file:
-        path: "{{ deployments_dir }}"
+
+    - name: Move all SQL files from /tmp to the destination directory
+      command: mv "{{ item }}" "{{ destination_dir }}/"
+      with_fileglob:
+        - "/tmp/*.sql"
+      args:
+        removes: "{{ item }}"
+
+    - name: Change ownership of all SQL files in the destination
+      file:
+        path: "{{ item }}"
         owner: oracle
         group: dba
-        recurse: yes
-
+        recurse: no
+      with_fileglob:
+        - "{{ destination_dir }}/*.sql"
