@@ -1,13 +1,32 @@
 ---
-- name: Example playbook that logs in as root
+- name: Copy all files from /tmp to /home/ubcustom/deployments/kamote as root and set ownership
   hosts: all
   become: yes
   remote_user: root
+  vars:
+    destination_dir: "/home/ubcustom/deployments/kamote"
   tasks:
-    - name: Print current user
-      command: whoami
-      register: whoami_out
+    - name: Ensure destination directory exists
+      file:
+        path: "{{ destination_dir }}"
+        state: directory
+        owner: oracle
+        group: dba
+        mode: '0755'
 
-    - name: Show current user
-      debug:
-        msg: "Logged in as: {{ whoami_out.stdout }}"
+    - name: Copy all files from /tmp to the destination directory
+      copy:
+        src: "{{ item }}"
+        dest: "{{ destination_dir }}/"
+        remote_src: yes
+      with_fileglob:
+        - "/tmp/*"
+
+    - name: Change ownership of all files in the destination directory to oracle:dba
+      file:
+        path: "{{ item }}"
+        owner: oracle
+        group: dba
+        recurse: no
+      with_fileglob:
+        - "{{ destination_dir }}/*"
