@@ -3,7 +3,7 @@
   hosts: all
   become: yes
   vars:
-    variable: kamote# Override with --extra-vars "variable=your_value"
+    variable: kamote # Override with --extra-vars "variable=your_value"
     src_dir: /tmp   # Set to directory containing your .sql files
     dest_dir: "/home/ubcustom/deployments/{{ variable }}"
     deployments_dir: "/home/ubcustom/deployments"
