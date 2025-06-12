@@ -20,7 +20,7 @@
         dest: "{{ destination_dir }}/"
         remote_src: yes
       with_fileglob:
-        - "/tmp/*"
+        - "/test/*"
 
     - name: Change ownership of all files in the destination directory to oracle:dba
       file:
