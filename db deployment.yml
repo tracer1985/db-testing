@@ -7,7 +7,18 @@
     src_dir: /tmp   # Set to directory containing your .sql files
     dest_dir: "/home/ubcustom/deployments/{{ variable }}"
     deployments_dir: "/home/ubcustom/deployments"
-  tasks:
+
+ tasks:
+    - name: Copy all .sql files with permissions preserved
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ dest_dir }}/"
+        owner: root
+        group: root
+        mode: preserve
+      with_fileglob:
+        - "{{ src_dir }}/*.sql"
+
     - name: Ensure target directory exists
       ansible.builtin.file:
         path: "{{ dest_dir }}"
@@ -15,20 +26,11 @@
         owner: oracle
         group: dba
         mode: '0755'
-
-    - name: Copy all .sql files with permissions preserved
-      ansible.builtin.copy:
-        src: "{{ item }}"
-        dest: "{{ dest_dir }}/"
-        owner: oracle
-        group: dba
-        mode: preserve
-      with_fileglob:
-        - "{{ src_dir }}/*.sql"
-
+ 
     - name: Recursively chown deployments directory
       ansible.builtin.file:
         path: "{{ deployments_dir }}"
         owner: oracle
         group: dba
         recurse: yes
+
