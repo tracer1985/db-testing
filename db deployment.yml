@@ -1,5 +1,5 @@
 ---
-- name: Move all SQL files from /tmp to /home/ubcustom/deployments/kamote as root, then chown oracle:dba
+- name: Copy and move all SQL files from /tmp to /home/ubcustom/deployments/kamote, then chown oracle:dba (as root)
   hosts: all
   become: yes
   remote_user: root
@@ -14,18 +14,30 @@
         group: dba
         mode: '0755'
 
-    - name: Move all SQL files from /tmp to the destination directory
-      command: mv "{{ item }}" "{{ destination_dir }}/"
+    - name: Copy all SQL files from /tmp to the destination directory
+      copy:
+        src: "{{ item }}"
+        dest: "{{ destination_dir }}/"
+        owner: oracle
+        group: dba
+        mode: '0644'
+        remote_src: yes
       with_fileglob:
         - "/tmp/*.sql"
-      args:
-        removes: "{{ item }}"
 
-    - name: Change ownership of all SQL files in the destination
+    - name: Remove SQL files from /tmp after copying
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_fileglob:
+        - "/tmp/*.sql"
+
+    - name: Ensure correct ownership and permissions on all SQL files in destination
       file:
         path: "{{ item }}"
         owner: oracle
         group: dba
+        mode: '0644'
         recurse: no
       with_fileglob:
         - "{{ destination_dir }}/*.sql"
