@@ -1,29 +1,26 @@
 ---
-- name: Copy all files from /tmp to /home/ubcustom/deployments/kamote as root and set ownership
-  hosts: all
-  become: yes
-  remote_user: root
-  vars:
-    src_file: "/test"
-    destination_dir: "/home/ubcustom/deployments/kamote/"
+- name: Fetch all files from /tmp/dep/ on 192.168.100.32 to control node
+  hosts: 192.168.100.32
+  gather_facts: no
   tasks:
-    - name: Ensure destination directory exists
-      file:
-        path: "{{ destination_dir }}"
-        state: directory
-        owner: oracle
-        group: dba
-        mode: '0755'
+    - name: Fetch all files from /tmp/dep/ to control node
+      ansible.builtin.fetch:
+        src: /tmp/dep/
+        dest: /tmp/remote_dep_fetch/
+        flat: no
+        fail_on_missing: no
 
-    - name: Copy all files from /test to the destination directory
-      copy:
-        src: "{{ src_file }}"
-        dest: "{{ destination_dir }}"
-        remote_src: yes
-
-    - name: Ensure /home/ubcustom/deployments/kamote/ is owned by oracle:dba recursively
-      ansible.builtin.file:
-        path: "/home/ubcustom/deployments/kamote/{{ src_file }}"
-        owner: oracle
-        group: dba
-        recurse: yes
+- name: Copy all files to /home/ubcustom/deployments/kamote/ on all hosts, preserving access and overwriting
+  hosts: all
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Copy all files and overwrite if exists, preserve owner/group/mode
+      ansible.builtin.copy:
+        src: /tmp/remote_dep_fetch/192.168.100.32/tmp/dep/
+        dest: /home/ubcustom/deployments/kamote/
+        owner: preserve
+        group: preserve
+        mode: preserve
+        remote_src: no
+        force: yes
