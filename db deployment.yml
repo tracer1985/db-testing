@@ -1,5 +1,5 @@
 ---
-- name: Copy files from 192.168.100.32:/tmp/dep/ to all hosts
+- name: Copy files from 192.168.100.32:/tmp/dep/ to /home/ubcustom/deployments/kamote/ as root
   hosts: all
   gather_facts: false
   vars:
@@ -7,14 +7,14 @@
     src_path: /tmp/dep/
     dest_path: /home/ubcustom/deployments/kamote/
   tasks:
-    - name: Synchronize files from remote src_host to managed node
+    - name: Synchronize files from remote src_host to this managed node as root
       ansible.builtin.synchronize:
         src: "{{ src_path }}"
         dest: "{{ dest_path }}"
         mode: pull
-        archive: yes
-        compress: yes
-        times: yes
+        archive: true
+        compress: true
+        times: true
       delegate_to: "{{ src_host }}"
-      become: yes
-      become_user: ubcustom
+      become: true
+      become_user: root
