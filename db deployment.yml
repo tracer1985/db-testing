@@ -1,24 +1,29 @@
 ---
-- name: Transfer directory from 192.168.100.33:/tmp/dep to Windows hosts using WinSCP
-  hosts: windows
-  gather_facts: false
+- name: Copy all files from /tmp to /home/ubcustom/deployments/kamote as root and set ownership
+  hosts: all
+  become: yes
+  remote_user: root
   vars:
-    winscp_path: 'C:\\Program Files (x86)\\WinSCP\\WinSCP.com'
-    remote_user: root
-    remote_pass: 22785Jaz
-    remote_ip: 192.168.100.33
-    remote_src: /tmp/dep/
-    local_dest: 'C:\test'
+    src_file: "/test"
+    destination_dir: "/home/ubcustom/deployments/kamote/"
   tasks:
     - name: Ensure destination directory exists
-      ansible.windows.win_file:
-        path: "{{ local_dest }}"
+      file:
+        path: "{{ destination_dir }}"
         state: directory
+        owner: oracle
+        group: dba
+        mode: '0755'
 
-    - name: Transfer directory with WinSCP
-      ansible.windows.win_command: >
-        "{{ winscp_path }}"
-        /command
-        "open sftp://{{ remote_user }}:{{ remote_pass }}@{{ remote_ip }}/"
-        "get {{ remote_src }} {{ local_dest }} /subdirectories"
-        "exit"
+    - name: Copy all files from /test to the destination directory
+      copy:
+        src: "{{ src_file }}"
+        dest: "{{ destination_dir }}"
+        remote_src: yes
+
+    - name: Ensure /home/ubcustom/deployments/kamote/ is owned by oracle:dba recursively
+      ansible.builtin.file:
+        path: "/home/ubcustom/deployments/kamote/{{ src_file }}"
+        owner: oracle
+        group: dba
+        recurse: yes
