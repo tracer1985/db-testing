@@ -1,26 +1,20 @@
 ---
-- name: Fetch all files from /tmp/dep/ on 192.168.100.32 to control node
-  hosts: 192.168.100.32
-  gather_facts: no
-  tasks:
-    - name: Fetch all files from /tmp/dep/ to control node
-      ansible.builtin.fetch:
-        src: /tmp/dep/
-        dest: /tmp/remote_dep_fetch/
-        flat: no
-        fail_on_missing: no
-
-- name: Copy all files to /home/ubcustom/deployments/kamote/ on all hosts, preserving access and overwriting
+- name: Copy files from 192.168.100.32:/tmp/dep/ to all hosts
   hosts: all
-  gather_facts: no
-  become: yes
+  gather_facts: false
+  vars:
+    src_host: 192.168.100.32
+    src_path: /tmp/dep/
+    dest_path: /home/ubcustom/deployments/kamote/
   tasks:
-    - name: Copy all files and overwrite if exists, preserve owner/group/mode
-      ansible.builtin.copy:
-        src: /tmp/remote_dep_fetch/192.168.100.32/tmp/dep/
-        dest: /home/ubcustom/deployments/kamote/
-        owner: preserve
-        group: preserve
-        mode: preserve
-        remote_src: no
-        force: yes
+    - name: Synchronize files from remote src_host to managed node
+      ansible.builtin.synchronize:
+        src: "{{ src_path }}"
+        dest: "{{ dest_path }}"
+        mode: pull
+        archive: yes
+        compress: yes
+        times: yes
+      delegate_to: "{{ src_host }}"
+      become: yes
+      become_user: ubcustom
