@@ -1,19 +1,24 @@
 ---
-- name: Copy all files from 192.168.100.33:/tmp/dep/ to all hosts, preserving access
-  hosts: all
+- name: Transfer directory from 192.168.100.33:/tmp/dep to Windows hosts using WinSCP
+  hosts: windows
   gather_facts: false
   vars:
-    src_host: 192.168.100.33       # Ensure this is correct!
-    src_path: "/tmp/dep/"            # Trailing slash!
-    dest_path: "/tmp/dep/"           # Trailing slash!
+    winscp_path: 'C:\\Program Files (x86)\\WinSCP\\WinSCP.com'
+    remote_user: root
+    remote_pass: 22785Jaz
+    remote_ip: 192.168.100.33
+    remote_src: /tmp/dep/
+    local_dest: 'C:\test'
   tasks:
-    - name: Synchronize all files and folders from src_host to this managed node
-      ansible.builtin.synchronize:
-        src: "{{ src_path }}"
-        dest: "{{ dest_path }}"
-        mode: pull
-        archive: true
-        compress: true
-        times: true
-      delegate_to: "{{ src_host }}"
-      become: true
+    - name: Ensure destination directory exists
+      ansible.windows.win_file:
+        path: "{{ local_dest }}"
+        state: directory
+
+    - name: Transfer directory with WinSCP
+      ansible.windows.win_command: >
+        "{{ winscp_path }}"
+        /command
+        "open sftp://{{ remote_user }}:{{ remote_pass }}@{{ remote_ip }}/"
+        "get {{ remote_src }} {{ local_dest }} /subdirectories"
+        "exit"
