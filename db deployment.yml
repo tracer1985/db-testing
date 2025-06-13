@@ -4,8 +4,8 @@
   gather_facts: false
   vars:
     src_host: 192.168.100.32
-    src_path: /tmp/dep/
-    dest_path: /tmp/dep/
+    src_path: /tmp/dep
+    dest_path: /tmp/dep
   tasks:
     - name: Synchronize all files and folders from src_host to this managed node
       ansible.builtin.synchronize:
