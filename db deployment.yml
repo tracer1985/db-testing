@@ -19,13 +19,4 @@
         src: "/test"
         dest: "{{ destination_dir }}"
         remote_src: yes
-     
 
-    - name: Change ownership of all files in the destination directory to oracle:dba
-      file:
-        path: "{{ item }}"
-        owner: oracle
-        group: dba
-        recurse: no
-      with_fileglob:
-        - "{{ destination_dir }}*"
