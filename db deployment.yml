@@ -1,5 +1,5 @@
 ---
-- name: Copy files from 192.168.100.32:/tmp/dep/ to all hosts, preserving access
+- name: Copy all files from 192.168.100.32:/tmp/dep/ to all hosts, preserving access
   hosts: all
   gather_facts: false
   vars:
@@ -7,12 +7,12 @@
     src_path: /tmp/dep/
     dest_path: /tmp/dep/
   tasks:
-    - name: Synchronize files from remote src_host to this managed node
+    - name: Synchronize all files and folders from src_host to this managed node
       ansible.builtin.synchronize:
         src: "{{ src_path }}"
         dest: "{{ dest_path }}"
         mode: pull
-        archive: true   # Preserves permissions, ownership, timestamps
+        archive: true      # Preserves permissions, ownership, timestamps, copies recursively
         compress: true
         times: true
       delegate_to: "{{ src_host }}"
