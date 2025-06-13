@@ -14,9 +14,17 @@
         group: dba
         mode: '0755'
 
-    - name: Copy all files from /tmp to the destination directory
+    - name: Copy all files from /test to the destination directory
       copy:
         src: "/test"
         dest: "{{ destination_dir }}"
         remote_src: yes
 
+    - name: Change ownership of all files in the destination directory to oracle:dba
+      file:
+        path: "{{ item }}"
+        owner: oracle
+        group: dba
+        recurse: no
+      with_fileglob:
+        - "{{ destination_dir }}*"
