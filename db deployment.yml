@@ -16,11 +16,10 @@
 
     - name: Copy all files from /tmp to the destination directory
       copy:
-        src: "{{ item }}"
+        src: "/test"
         dest: "{{ destination_dir }}"
         remote_src: yes
-      with_fileglob:
-        - "/test/*"
+     
 
     - name: Change ownership of all files in the destination directory to oracle:dba
       file:
