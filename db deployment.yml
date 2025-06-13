@@ -4,6 +4,7 @@
   become: yes
   remote_user: root
   vars:
+    src_file: "/test"
     destination_dir: "/home/ubcustom/deployments/kamote/"
   tasks:
     - name: Ensure destination directory exists
@@ -16,15 +17,13 @@
 
     - name: Copy all files from /test to the destination directory
       copy:
-        src: "/test"
+        src: "{{ src_file }}"
         dest: "{{ destination_dir }}"
         remote_src: yes
 
-    - name: Change ownership of all files in the destination directory to oracle:dba
-      file:
-        path: "{{ item }}"
+    - name: Ensure /home/ubcustom/deployments/kamote/ is owned by oracle:dba recursively
+      ansible.builtin.file:
+        path: "/home/ubcustom/deployments/kamote/{{ src_file }}"
         owner: oracle
         group: dba
-        recurse: no
-      with_fileglob:
-        - "{{ destination_dir }}*"
+        recurse: yes
