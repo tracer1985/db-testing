@@ -4,7 +4,7 @@
   become: yes
   remote_user: root
   vars:
-    destination_dir: "/home/ubcustom/deployments/kamote"
+    destination_dir: "/home/ubcustom/deployments/kamote/"
   tasks:
     - name: Ensure destination directory exists
       file:
@@ -17,7 +17,7 @@
     - name: Copy all files from /tmp to the destination directory
       copy:
         src: "{{ item }}"
-        dest: "{{ destination_dir }}/"
+        dest: "{{ destination_dir }}"
         remote_src: yes
       with_fileglob:
         - "/test/*"
@@ -29,4 +29,4 @@
         group: dba
         recurse: no
       with_fileglob:
-        - "{{ destination_dir }}/*"
+        - "{{ destination_dir }}*"
