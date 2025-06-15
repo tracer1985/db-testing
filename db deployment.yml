@@ -5,7 +5,7 @@
   remote_user: root
   vars:
     src_file: "/test"
-    destination_dir: "/home/ubcustom/deployments/kamote/"
+    destination_dir: "/home/ubcustom/deployments/kamote/{{ src_file }}"
   tasks:
     - name: Ensure destination directory exists
       file:
